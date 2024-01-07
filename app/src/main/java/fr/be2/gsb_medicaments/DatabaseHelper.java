@@ -10,12 +10,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -98,7 +100,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         selectionArgs.add("%" + denomination + "%");
         selectionArgs.add("%" + formePharmaceutique + "%");
         selectionArgs.add( "%" + titulaires + "%");
-        selectionArgs.add( "%" + denominationSubstance + "%");
+        selectionArgs.add( "%" + removeAccents( denominationSubstance) + "%");
         SQLiteDatabase db = this.getReadableDatabase();
         String finSQL ="";
 
@@ -106,13 +108,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             finSQL ="AND  Voies_dadministration = ?";
             selectionArgs.add(voiesAdmin);
         }
-
+        String SQLSubstance ="SELECT CODE_CIS FROM CIS_COMPO_bdpm WHERE replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(upper(Denomination_substance), 'Â','A'),'Ä','A'),'À','A'),'É','E'),'Á','A'),'Ï','I'), 'Ê','E'),'È','E'),'Ô','O'),'Ü','U'), 'Ç','C' ) LIKE ?" ;
         // La requête SQL de recherche
         String query = "SELECT * FROM CIS_bdpm WHERE " +
                 "Denomination_du_medicament LIKE ? AND " +
                 "Forme_pharmaceutique LIKE ? AND " +
                 "Titulaires LIKE ? AND " +
-                "Code_CIS IN (SELECT Code_CIS FROM CIS_COMPO_bdpm WHERE Denomination_substance LIKE ?) " +
+                "Code_CIS IN ("+SQLSubstance+") " +
                 finSQL;
 
         // Les valeurs à remplacer dans la requête
@@ -130,6 +132,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String formePharmaceutiqueMedicament = cursor.getString(cursor.getColumnIndex("Forme_pharmaceutique"));
                 String voiesAdminMedicament = cursor.getString(cursor.getColumnIndex("Voies_dadministration"));
                 String titulairesMedicament = cursor.getString(cursor.getColumnIndex("Titulaires"));
+                String statutAdministratifMedicament = cursor.getString(cursor.getColumnIndex("Statut_administratif_de_lAMM"));
 
                 // Créer un objet Medicament avec les valeurs récupérées
                 Medicament medicament = new Medicament();
@@ -138,6 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 medicament.setFormePharmaceutique(formePharmaceutiqueMedicament);
                 medicament.setVoiesAdmin(voiesAdminMedicament);
                 medicament.setTitulaires(titulairesMedicament);
+                medicament.setStatutAdmin(statutAdministratifMedicament);
 
                 // Ajouter l'objet Medicament à la liste
                 medicamentList.add(medicament);
@@ -167,8 +171,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // dossier de destination
             File pathFile = new File(DATABASE_PATH);
-            if(!pathFile.exists()) {
-                if(!pathFile.mkdirs()) {
+            if (!pathFile.exists()) {
+                if (!pathFile.mkdirs()) {
                     Toast.makeText(mycontext, "Erreur : copydatabase(), pathFile.mkdirs()", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -185,28 +189,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
             // Fermeture
-            Log.d("APP","BDD copiée");
+            Log.d("APP", "BDD copiée");
             myOutput.flush();
             myOutput.close();
             myInput.close();
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            Log.d("ERROR","erreur copie de la base");
+            Log.d("ERROR", "erreur copie de la base");
             Toast.makeText(mycontext, "Erreur : copydatabase()", Toast.LENGTH_SHORT).show();
         }
 
         // on greffe le numéro de version
-        try{
+        try {
             SQLiteDatabase checkdb = SQLiteDatabase.openDatabase(DATABASE_PATH + DATABASE_NAME, null, SQLiteDatabase.OPEN_READWRITE);
             checkdb.setVersion(DATABASE_VERSION);
-        }
-        catch(SQLiteException e) {
+        } catch (SQLiteException e) {
             // bdd n'existe pas
         }
-
     }
+        private String removeAccents(String input) {
+            if (input == null) {
+                return null;
+            }
 
+            // Normalisation en forme de décomposition (NFD)
+            String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
 
-}
+            // Remplacement des caractères diacritiques
+            Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+            return pattern.matcher(normalized).replaceAll("");
+        }
+    }
