@@ -55,4 +55,24 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
+    <LinearLayout
+        android:id="@+id/deconexQuitter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/btnDeconnexion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="AffichePageDeconnexion"
+        android:text="Deconnexion" />
+
+    <Button
+        android:id="@+id/btnQuitter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="AffichePageDeconnexion"
+        android:text="Quitter"/>
+    </LinearLayout>
 </LinearLayout>

@@ -27,17 +27,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-    <!-- EditText for entering the key recived by email -->
+        <!-- EditText for entering the key recived by email -->
 
-    <EditText
-        android:id="@+id/myKey"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Clé secrète"/>
-    <Button
-        android:id="@+id/btnValiderCle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Valider"/>
+        <EditText
+            android:id="@+id/myKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Clé secrète"/>
+        <Button
+            android:id="@+id/btnValiderCle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="Affiche2Layout"
+            android:text="Valider"/>
     </LinearLayout>
-    </LinearLayout>
+</LinearLayout>
