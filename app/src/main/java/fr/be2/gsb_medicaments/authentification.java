@@ -35,18 +35,17 @@ public class authentification extends AppCompatActivity {
         layoutCle.setVisibility(View.INVISIBLE);
           }
     public void AfficheLayout(View v){
-        String secureKey = "votre_secureKey";
-        layoutCle.setVisibility(View.VISIBLE);
         myRandomKey=genererChaineAleatoire(5);
-        Log.d( "APPLI","myKey"+myRandomKey );
+        //Log.d( "APPLI","myKey"+myRandomKey );
         String codeV = editTextCodeV.getText().toString();
 
         // Vous pouvez maintenant utiliser la méthode sendKeyByEmail
         // avec le codeV, secureKey, et token comme paramètres
-
+        String secureKey = myRandomKey;
         String token = SECURETOKEN;
         SendKeyTask sendKeyTask = new SendKeyTask(getApplicationContext());
         sendKeyTask.execute(codeV, secureKey, token);
+        layoutCle.setVisibility(View.VISIBLE);
 
     }
     private String genererChaineAleatoire(int longueur) {

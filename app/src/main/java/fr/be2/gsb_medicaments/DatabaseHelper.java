@@ -1,7 +1,6 @@
 package fr.be2.gsb_medicaments;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -93,35 +92,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return dbfile.exists();
     }
-    public List<Medicament> searchMedicaments(String denomination, String formePharmaceutique, String titulaires, String denominationSubstance, String voiesAdmin)
-    {
+    public List<Medicament> searchMedicaments(String denomination, String formePharmaceutique, String titulaires, String denominationSubstance, String voiesAdmin) {
         List<Medicament> medicamentList = new ArrayList<>();
         ArrayList<String> selectionArgs = new ArrayList<>();
         selectionArgs.add("%" + denomination + "%");
         selectionArgs.add("%" + formePharmaceutique + "%");
-        selectionArgs.add( "%" + titulaires + "%");
-        selectionArgs.add( "%" + removeAccents( denominationSubstance) + "%");
+        selectionArgs.add("%" + titulaires + "%");
+        selectionArgs.add("%" + removeAccents(denominationSubstance) + "%");
         SQLiteDatabase db = this.getReadableDatabase();
-        String finSQL ="";
+        String finSQL = "";
 
-        if (!voiesAdmin.equals(PREMIERE_VOIE)){
-            finSQL ="AND  Voies_dadministration = ?";
+        if (!voiesAdmin.equals(PREMIERE_VOIE)) {
+            finSQL = "AND  Voies_dadministration = ?";
             selectionArgs.add(voiesAdmin);
         }
-        String SQLSubstance ="SELECT CODE_CIS FROM CIS_COMPO_bdpm WHERE replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(upper(Denomination_substance), 'Â','A'),'Ä','A'),'À','A'),'É','E'),'Á','A'),'Ï','I'), 'Ê','E'),'È','E'),'Ô','O'),'Ü','U'), 'Ç','C' ) LIKE ?" ;
+        String SQLSubstance = "SELECT CODE_CIS FROM CIS_COMPO_bdpm WHERE replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(upper(Denomination_substance), 'Â','A'),'Ä','A'),'À','A'),'É','E'),'Á','A'),'Ï','I'), 'Ê','E'),'È','E'),'Ô','O'),'Ü','U'), 'Ç','C' ) LIKE ?";
         // La requête SQL de recherche
         String query = "SELECT * FROM CIS_bdpm WHERE " +
                 "Denomination_du_medicament LIKE ? AND " +
                 "Forme_pharmaceutique LIKE ? AND " +
                 "Titulaires LIKE ? AND " +
-                "Code_CIS IN ("+SQLSubstance+") " +
+                "Code_CIS IN (" + SQLSubstance + ") " +
                 finSQL;
 
         // Les valeurs à remplacer dans la requête
 
 
-        Cursor  cursor = db.rawQuery(query, selectionArgs.toArray(new String[0]));
-
+        Cursor cursor = db.rawQuery(query, selectionArgs.toArray(new String[0]));
 
 
         if (cursor.moveToFirst()) {
@@ -146,16 +143,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Ajouter l'objet Medicament à la liste
                 medicamentList.add(medicament);
             } while (cursor.moveToNext());
-        }
-        else {
+        } else {
             Toast.makeText(mycontext, "Aucun résultat", Toast.LENGTH_LONG).show();
+            cursor.close();
+            db.close();
 
+            return medicamentList;
+        }
+
+        public List<String> getCompositionMedicament(int codeCIS) {
+        List<String> compositionList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM CIS_compo_bdpm WHERE Code_CIS = ?", new String[]{String.valueOf(codeCIS)});
+        int i=0;
+        if (cursor.moveToFirst()) {
+            do {
+                i++;
+                String substance = cursor.getString(cursor.getColumnIndex("Denomination_substance"));
+                String dosage = cursor.getString(cursor.getColumnIndex("Dosage_substance"));
+                compositionList.add(i+":"+substance + "(" + dosage + ")");
+            } while (cursor.moveToNext());
         }
 
         cursor.close();
         db.close();
 
-        return medicamentList;
+        return compositionList;
     }
 
     private void copydatabase() {
