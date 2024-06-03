@@ -6,7 +6,7 @@ public class Medicament {
     private String voiesAdmin;
     private String titulaires;
     private String statutAdministratif;
-
+    public Integer NbMolecules;
     // Constructeur
 
     // Getter et Setter pour codeCIS
@@ -60,6 +60,13 @@ public class Medicament {
     }
 
     public void setStatutAdmin(String statutAdministratif) {
+        this.statutAdministratif = statutAdministratif;
+    }
+    public String getNbMolecule() {
+        return NbMolecules;
+    }
+
+    public void getNbMolecule(String NbMolecules) {
         this.statutAdministratif = statutAdministratif;
     }
 }
