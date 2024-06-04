@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -127,15 +128,28 @@ public class MainActivity extends AppCompatActivity {
     }
     private void afficherCompositionMedicament(Medicament medicament) {
         List<String> composition = dbHelper.getCompositionMedicament(medicament.getCodeCIS());
+        List<String> presentation = dbHelper.getPresentationMedicament(medicament.getCodeCIS());
 
         // Afficher la composition du médicament dans une boîte de dialogue ou autre méthode d'affichage
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Composition de " + medicament.getCodeCIS());
+        StringBuilder compositionText = new StringBuilder();
         if (composition.isEmpty()) {
-            builder.setMessage("Aucune composition disponible pour ce médicament.");
+            compositionText.append("Pas de composition").append("\n");
         } else {
-            StringBuilder compositionText = new StringBuilder();
             for (String item : composition) {
+                compositionText.append(item).append("\n");
+            }
+           builder.setMessage(compositionText.toString());
+        }
+
+        compositionText.append("                                                ").append("\n");
+        compositionText.append("Presentation").append("\n");
+        if (presentation.isEmpty()) {
+            compositionText.append("Pas de présentation").append("\n");
+        } else {
+           // StringBuilder presentationText = new StringBuilder();
+            for (String item : presentation) {
                 compositionText.append(item).append("\n");
             }
             builder.setMessage(compositionText.toString());
